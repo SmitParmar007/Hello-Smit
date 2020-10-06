@@ -1,0 +1,113 @@
+package com.sanjay.employeemanagment.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.sanjay.employeemanagment.entity.GridModel;
+import com.sanjay.employeemanagment.service.GridService;
+
+import net.sf.json.JSONObject;
+
+@Controller
+public class JqGridMainController {
+
+	@Autowired
+	private GridService gridservice;
+
+	public void setGridservice(GridService gridservice) {
+		this.gridservice = gridservice;
+	}
+
+	@GetMapping(value = "/gridData")
+	@ResponseBody
+	public String getAllGridData(HttpServletRequest req) {
+		if (req.getParameter("searchString") == null)
+		
+
+		System.out.println(req.getParameter("searchString"));
+		JSONObject jobj = new JSONObject();
+		JSONObject object = new JSONObject();
+		System.out.println("parse integer");
+		
+		Integer id = Integer.parseInt(req.getParameter("id"));
+			
+				System.out.println("parse integer");
+		if (id != 0) {
+			
+			jobj.put("rows", gridservice.findById(id));
+				
+			return jobj.toString();
+		} else 
+		{
+		System.out.println("called");
+			try 
+			{
+				object.put("rows", gridservice.findAll());
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			return object.toString();
+		}
+	}
+	
+	@GetMapping("/gridsave")
+
+	public String insert(Model theModel) {
+
+		GridModel g = new GridModel();
+
+		theModel.addAttribute("gridf", g);
+
+		return "grid";
+
+	}
+
+	@GetMapping("/gridupdate")
+	public String gridUpdate(@ModelAttribute("insert") GridModel gridmodel) {
+		System.out.println("update Controller called");
+
+		System.out.println("save method is called");
+		gridservice.save(gridmodel);
+
+		return "grid";
+
+	}
+
+	@PostMapping("/savegridprocess")
+	public String Save(@ModelAttribute("insert") GridModel gridmodel) {
+
+		System.out.println("data is called");
+		gridservice.save(gridmodel);
+		return "grid";
+
+	}
+
+	@GetMapping("/griddelete")
+	public void delete(@RequestParam(value = "id", required = false) Integer id) {
+
+		System.out.println("delete called  " + id);
+		gridservice.deleteById(id);
+
+	}
+
+	@GetMapping("/searchprocess")
+
+	public String Search(@RequestParam("id") Integer id) {
+
+		System.out.println("inside search controller");
+
+		gridservice.findById(id);
+		return "grid";
+	}
+
+}
